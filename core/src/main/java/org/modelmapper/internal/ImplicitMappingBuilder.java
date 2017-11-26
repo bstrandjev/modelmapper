@@ -27,6 +27,7 @@ import org.modelmapper.TypeMap;
 import org.modelmapper.internal.PropertyInfoImpl.ValueReaderPropertyInfo;
 import org.modelmapper.internal.converter.ConverterStore;
 import org.modelmapper.internal.util.Iterables;
+import org.modelmapper.internal.util.Lists;
 import org.modelmapper.internal.util.Strings;
 import org.modelmapper.internal.util.Types;
 import org.modelmapper.spi.ConditionalConverter;
@@ -187,7 +188,8 @@ class ImplicitMappingBuilder<S, D> {
               MatchResult matchResult = converter.match(accessor.getType(),
                   destinationMutator.getType());
 
-              if (!MatchResult.NONE.equals(matchResult)) {
+              if (!MatchResult.NONE.equals(matchResult)
+                  && !willOverrideExplicitMapping(propertyNameInfo)) {
                 mapping = new PropertyMappingImpl(propertyNameInfo.getSourceProperties(),
                     propertyNameInfo.getDestinationProperties(), false);
 
@@ -315,5 +317,22 @@ class ImplicitMappingBuilder<S, D> {
         && mapping instanceof PropertyMapping
         && converterStore.getFirstSupported(((PropertyMapping) mapping).getLastSourceProperty()
             .getType(), mapping.getLastDestinationProperty().getType()) != null;
+  }
+  
+  private boolean willOverrideExplicitMapping(PropertyNameInfoImpl propertyNameInfoImpl) {
+    for (Mapping mapping : typeMap.getMappings()) {
+      if (!(mapping instanceof PropertyMappingImpl)) {
+        continue;
+      }
+      PropertyMappingImpl mappingImpl = (PropertyMappingImpl) mapping;
+      if (!mappingImpl.isExplicit()) {
+        continue;
+      }
+      if (Lists.listPrefixOfList(mappingImpl.getDestinationProperties(),
+          propertyNameInfoImpl.getDestinationProperties())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

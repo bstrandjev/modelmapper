@@ -41,4 +41,23 @@ public final class Lists {
       list.add(entry.getKey());
     return list;
   }
+  
+  /**
+   * Checks whether a given list is a prefix of a target list.
+   * @param potentialPrefix the potential prefix
+   * @param targetList the list to check into.
+   * @return whether the candidate list is prefix of the target list.
+   */
+  @SuppressWarnings("rawtypes")
+  public static boolean listPrefixOfList(List potentialPrefix, List targetList) {
+    if (potentialPrefix.size() > targetList.size()) {
+      return false;
+    }
+    for (int idx = 0; idx < potentialPrefix.size(); idx++) {
+      if (!potentialPrefix.get(idx).equals(targetList.get(idx))) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
